@@ -1,7 +1,6 @@
 import { FastifyPluginAsync } from 'fastify'
 import fp from 'fastify-plugin'
-import jwt, { decode } from 'jsonwebtoken'
-import AppError from '../lib/AppError.js'
+import jwt from 'jsonwebtoken'
 import { AccessTokenPayload, validateToken } from '../lib/tokens.js'
 
 const { JsonWebTokenError } = jwt
