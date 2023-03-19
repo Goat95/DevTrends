@@ -16,6 +16,12 @@ const StyledInput = styled.input`
   padding-left: 16px;
   padding-right: 16px;
   color: ${colors.gray5};
+  &:focus {
+    border: 1px solid ${colors.primary};
+  }
+  &::placeholder {
+    color: ${colors.gray2};
+  }
 `;
 
 export default Input;
