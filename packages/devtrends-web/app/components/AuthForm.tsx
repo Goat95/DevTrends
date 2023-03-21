@@ -1,6 +1,8 @@
 import { Form, useActionData } from "@remix-run/react";
+import { useMemo } from "react";
 import styled from "styled-components";
 import { useFormLoading } from "~/hooks/useFormLoading";
+import { type AppError } from "~/lib/error";
 import Button from "./Button";
 import LabelInput from "./LabelInput";
 import QuestionLink from "./QuestionLink";
@@ -11,6 +13,7 @@ interface ActionData {
 
 interface Props {
   mode: "login" | "register";
+  error?: AppError;
 }
 
 const authDescriptions = {
@@ -32,7 +35,7 @@ const authDescriptions = {
   },
 } as const;
 
-function AuthForm({ mode }: Props) {
+function AuthForm({ mode, error }: Props) {
   const action = useActionData<ActionData | undefined>();
   const isLoading = useFormLoading();
 
@@ -45,6 +48,13 @@ function AuthForm({ mode }: Props) {
     actionLink,
   } = authDescriptions[mode];
 
+  const usernameErrorMessage = useMemo(() => {
+    if (error?.name === "UserExistsError") {
+      return "이미 존재하는 계정입니다.";
+    }
+    return undefined;
+  }, [error]);
+
   return (
     <Block method="post">
       <InputGroup>
@@ -53,6 +63,7 @@ function AuthForm({ mode }: Props) {
           name="username"
           placeholder={usernamePlaceholder}
           disabled={isLoading}
+          errorMessage={usernameErrorMessage}
         />
         <LabelInput
           label="비밀번호"
