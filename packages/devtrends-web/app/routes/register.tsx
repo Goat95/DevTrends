@@ -1,12 +1,12 @@
-import { type ActionFunction, json, Response } from "@remix-run/node";
-import { ThrownResponse, useCatch } from "@remix-run/react";
+import { type ActionFunction, json } from "@remix-run/node";
+import { type ThrownResponse, useCatch } from "@remix-run/react";
 import AuthForm from "~/components/AuthForm";
 import FullHeightPage from "~/components/FullHeightPage";
 import Header from "~/components/Header";
 import HeaderBackButton from "~/components/HeaderBackButton";
 import { useGoBack } from "~/hooks/useGoBack";
 import { register } from "~/lib/api/auth";
-import { AppError, extractError } from "~/lib/error";
+import { type AppError, extractError } from "~/lib/error";
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
