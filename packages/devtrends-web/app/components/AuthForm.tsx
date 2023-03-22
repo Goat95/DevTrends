@@ -1,7 +1,7 @@
 import { Form, useActionData } from "@remix-run/react";
 import { useMemo, useState } from "react";
 import styled from "styled-components";
-import { useSubmitLoading } from "~/hooks/useFormLoading";
+import { useSubmitLoading } from "~/hooks/useSubmitLoading";
 import { type AppError } from "~/lib/error";
 import { isValidPassword, isValidUsername } from "~/lib/regex";
 import Button from "./Button";
