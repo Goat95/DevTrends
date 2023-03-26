@@ -1,10 +1,9 @@
 import { Form, useActionData } from "@remix-run/react";
-import { useMemo, useState } from "react";
+import { useEffect } from "react";
 import styled from "styled-components";
 import { useForm } from "~/hooks/useForm";
 import { useSubmitLoading } from "~/hooks/useSubmitLoading";
 import { type AppError } from "~/lib/error";
-import { isValidPassword, isValidUsername } from "~/lib/regex";
 import { validate } from "~/lib/validate";
 import Button from "./Button";
 import LabelInput from "./LabelInput";
@@ -42,21 +41,20 @@ function AuthForm({ mode, error }: Props) {
   const action = useActionData<ActionData | undefined>();
   const isLoading = useSubmitLoading();
 
-  const { inputProps, handleSubmit, errors } = useForm({
+  const { inputProps, handleSubmit, errors, setError } = useForm({
     form: {
       username: {
         validate: mode === "register" ? validate.username : undefined,
         errorMessage: "5~20자 사이의 영문 소문자 또는 숫자를 입력해주세요.",
-        initialValue: "hello",
       },
       password: {
         validate: mode === "register" ? validate.password : undefined,
         errorMessage:
           "8자 이상, 영문/숫자/특수문자 중 2가지 이상 입력해주세요.",
-        initialValue: "world",
       },
     },
     mode: "all",
+    shouldPreventDefault: false,
   });
   const {
     usernamePlaceholder,
@@ -67,19 +65,13 @@ function AuthForm({ mode, error }: Props) {
     actionLink,
   } = authDescriptions[mode];
 
-  const usernameErrorMessage = useMemo(() => {
-    if (errors.username) {
-      return errors.username;
-    }
-    if (error?.name === "UserExistsError") {
-      return "이미 존재하는 계정입니다.";
-    }
-    return undefined;
-  }, [error, errors.username]);
+  const onSubmit = handleSubmit(() => {});
 
-  const onSubmit = handleSubmit((values) => {
-    console.log(values);
-  });
+  useEffect(() => {
+    if (error?.name === "UserExistsError") {
+      setError("username", "이미 존재하는 계정입니다.");
+    }
+  }, [error, setError]);
 
   return (
     <StyledForm method="post" onSubmit={onSubmit}>
@@ -88,7 +80,7 @@ function AuthForm({ mode, error }: Props) {
           label="아이디"
           placeholder={usernamePlaceholder}
           disabled={isLoading}
-          errorMessage={usernameErrorMessage}
+          errorMessage={errors.username}
           {...inputProps.username}
         />
         <LabelInput
