@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { colors } from "~/lib/colors";
 import FooterTabItem from "./FooterTabItem";
 
-const paths = ["search", "bookmark", "setting"] as const;
+const paths = ["search", "bookmarks", "setting"] as const;
 function isValidPath(path: any): path is typeof paths[number] {
   return paths.includes(path);
 }
@@ -30,8 +30,8 @@ function Footer() {
       <FooterTabItem icon="plus-circle" />
       <FooterTabItem
         icon="bookmark"
-        isActive={currentPage === "bookmark"}
-        to="/bookmark"
+        isActive={currentPage === "bookmarks"}
+        to="/bookmarks"
       />
       <FooterTabItem
         icon="setting"
