@@ -1,4 +1,5 @@
 import type { LoaderFunction, MetaFunction } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -8,26 +9,42 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
+import { PROTECTED_ROUTES } from "./constants";
 import { UserContext } from "./contexts/UserContext";
 import GlobalStyle from "./GlobalStyle";
-import { type User } from "./lib/api/auth";
+import { getMyAccount, type User } from "./lib/api/auth";
 import { setClientCookie } from "./lib/client";
 import { extractError } from "./lib/error";
-import { getMemoMyAccount } from "./lib/protectRoute";
+
+function extractPathNameFromUrl(url: string) {
+  const { pathname } = new URL(url);
+  return pathname;
+}
 
 export const loader: LoaderFunction = async ({ request, context }) => {
   const cookie = request.headers.get("Cookie");
 
-  if (!cookie) return null;
+  const redirectIfNeeded = () => {
+    const { pathname, search } = new URL(request.url);
+    const isProtected = PROTECTED_ROUTES.some((route) =>
+      pathname.includes(route)
+    );
+    if (isProtected) {
+      return redirect("/login?next=" + encodeURIComponent(pathname + search));
+    }
+    return null;
+  };
+
+  if (!cookie) return redirectIfNeeded();
   setClientCookie(cookie);
   try {
-    const me = await getMemoMyAccount();
+    const me = await getMyAccount();
     return me;
   } catch (e) {
     const error = extractError(e);
     if (error.name === "UnauthorizedError") {
     }
-    return null;
+    return redirectIfNeeded();
   }
 };
 
