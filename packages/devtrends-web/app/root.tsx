@@ -10,21 +10,18 @@ import {
 } from "@remix-run/react";
 import { UserContext } from "./contexts/UserContext";
 import GlobalStyle from "./GlobalStyle";
-import { getMyAccount, type User } from "./lib/api/auth";
+import { type User } from "./lib/api/auth";
 import { setClientCookie } from "./lib/client";
 import { extractError } from "./lib/error";
+import { getMemoMyAccount } from "./lib/protectRoute";
 
-export const loader: LoaderFunction = async (args) => {
-  const { request } = args;
-  args.context = {
-    isLoggedIn: false,
-  };
+export const loader: LoaderFunction = async ({ request, context }) => {
   const cookie = request.headers.get("Cookie");
 
   if (!cookie) return null;
   setClientCookie(cookie);
   try {
-    const me = await getMyAccount();
+    const me = await getMemoMyAccount();
     return me;
   } catch (e) {
     const error = extractError(e);
