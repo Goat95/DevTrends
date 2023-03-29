@@ -24,18 +24,19 @@ function extractPathNameFromUrl(url: string) {
 export const loader: LoaderFunction = async ({ request, context }) => {
   const cookie = request.headers.get("Cookie");
 
-  const redirectIfNeeded = () => {
-    const { pathname, search } = new URL(request.url);
-    const isProtected = PROTECTED_ROUTES.some((route) =>
-      pathname.includes(route)
-    );
-    if (isProtected) {
-      return redirect("/login?next=" + encodeURIComponent(pathname + search));
-    }
-    return null;
-  };
+  // const redirectIfNeeded = () => {
+  //   const { pathname, search } = new URL(request.url);
+  //   const isProtected = PROTECTED_ROUTES.some((route) =>
+  //     pathname.includes(route)
+  //   );
+  //   if (isProtected) {
+  //     return redirect("/login?next=" + encodeURIComponent(pathname + search));
+  //   }
+  //   return null;
+  // };
 
-  if (!cookie) return redirectIfNeeded();
+  if (!cookie) return null;
+  // if (!cookie) return redirectIfNeeded();
   setClientCookie(cookie);
   try {
     const me = await getMyAccount();
@@ -43,8 +44,10 @@ export const loader: LoaderFunction = async ({ request, context }) => {
   } catch (e) {
     const error = extractError(e);
     if (error.name === "UnauthorizedError") {
+      // console.log(error.payload);
     }
-    return redirectIfNeeded();
+    return null;
+    // return redirectIfNeeded();
   }
 };
 
