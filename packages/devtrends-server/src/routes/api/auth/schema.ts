@@ -27,6 +27,7 @@ const authResultSchema = {
 }
 
 export const registerSchema: FastifySchema = {
+  tags: ['auth'],
   body: AuthBody,
   response: {
     200: authResultSchema,
@@ -39,6 +40,7 @@ export const registerSchema: FastifySchema = {
 }
 
 export const loginSchema: FastifySchema = {
+  tags: ['auth'],
   body: AuthBody,
   response: {
     200: authResultSchema,
@@ -51,6 +53,7 @@ export const loginSchema: FastifySchema = {
 }
 
 export const refreshTokenSchema: FastifySchema = {
+  tags: ['auth'],
   body: {
     type: 'object',
     properties: {
