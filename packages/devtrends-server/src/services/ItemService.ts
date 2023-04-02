@@ -1,4 +1,5 @@
 import db from '../lib/db'
+import { PaginationOptionType, createPagination } from '../lib/pagination'
 import { CreateItemBodyType } from '../routes/api/items/schema'
 
 class ItemService {
@@ -21,9 +22,84 @@ class ItemService {
         link,
         userId,
       },
+      include: {
+        user: true,
+      },
     })
     return item
   }
+
+  async getItem(id: number) {
+    const item = await db.item.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        user: true,
+      },
+    })
+    return item
+  }
+
+  async getPublicItems(
+    params: GetPublicItemsParams & PaginationOptionType = { mode: 'recent' },
+  ) {
+    const limit = params.limit ?? 20
+    if (params.mode === 'recent') {
+      const [totalCount, list] = await Promise.all([
+        db.item.count(),
+        db.item.findMany({
+          orderBy: {
+            createdAt: 'desc',
+          },
+          where: {
+            id: params.cursor
+              ? {
+                  lt: params.cursor,
+                }
+              : undefined,
+          },
+          include: {
+            user: true,
+          },
+          take: limit,
+        }),
+      ])
+
+      const endCursor = list.at(-1)?.id ?? null
+      const hasNextPage = endCursor
+        ? (await db.item.count({
+            where: {
+              id: {
+                lt: endCursor,
+              },
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+          })) > 0
+        : false
+
+      return createPagination({
+        list,
+        totalCount,
+        pageInfo: {
+          endCursor,
+          hasNextPage,
+        },
+      })
+    }
+    return []
+  }
 }
+
+type GetPublicItemsParams =
+  | {
+      mode: 'trending' | 'recent'
+    }
+  | {
+      mode: 'past'
+      date: string
+    }
 
 export default ItemService
