@@ -2,6 +2,7 @@ import { Static, Type } from '@sinclair/typebox'
 import { FastifySchema } from 'fastify'
 import { Nullable } from '../../../lib/typebox'
 import { UserSchema } from '../../../schema/UserSchema'
+import { PaginationSchema } from '../../../lib/pagination'
 
 const CreateItemSchema = Type.Object({
   title: Type.String(),
@@ -71,4 +72,10 @@ export interface GetItemsRoute {
   Querystring: {
     cursor?: string
   }
+}
+
+export const GetItemsSchema: FastifySchema = {
+  response: {
+    200: PaginationSchema(ItemSchema),
+  },
 }

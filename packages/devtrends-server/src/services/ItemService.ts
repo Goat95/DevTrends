@@ -1,3 +1,4 @@
+import AppError from '../lib/AppError'
 import db from '../lib/db'
 import { PaginationOptionType, createPagination } from '../lib/pagination'
 import { CreateItemBodyType } from '../routes/api/items/schema'
@@ -38,6 +39,9 @@ class ItemService {
         user: true,
       },
     })
+    if (!item) {
+      throw new AppError('NotFoundError')
+    }
     return item
   }
 
