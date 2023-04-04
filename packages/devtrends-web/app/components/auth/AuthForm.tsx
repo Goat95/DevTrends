@@ -89,6 +89,7 @@ function AuthForm({ mode, error }: Props) {
           disabled={isLoading}
           errorMessage={errors.password}
           {...inputProps.password}
+          type="password"
         />
       </InputGroup>
       <ActionsBox>
