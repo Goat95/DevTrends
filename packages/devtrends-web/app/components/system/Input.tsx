@@ -4,13 +4,14 @@ import { colors } from "~/lib/colors";
 
 export interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string | null;
+  initialValue?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, Props>(
   ({ errorMessage, ...rest }: Props, ref) => {
     return (
       <>
-        <StyledInput {...rest} ref={ref} />
+        <StyledInput {...rest} />
         {errorMessage ? <Message>{errorMessage}</Message> : null}
       </>
     );
