@@ -1,4 +1,5 @@
 import { useNavigate } from "@remix-run/react";
+import { useState } from "react";
 import BasicLayout from "~/components/layouts/BasicLayout";
 import Button from "~/components/system/Button";
 import LabelInput from "~/components/system/LabelInput";
@@ -8,6 +9,7 @@ import { useWriteContext } from "~/contexts/WriteContext";
 function WriteLink() {
   const navigate = useNavigate();
   const { state, actions } = useWriteContext();
+  const [link, setLink] = useState(state.link);
 
   return (
     <BasicLayout title="링크 입력" hasBackButton>
@@ -16,17 +18,18 @@ function WriteLink() {
         buttonText="다음"
         onSubmit={(e) => {
           e.preventDefault();
-          const formData = new FormData(e.currentTarget);
-          const url = formData.get("url") as string;
-          actions.setUrl(url);
+          actions.setLink(link);
           navigate("/write/intro");
         }}
       >
         <LabelInput
           label="URL"
           placeholder="https://example.com"
-          name="url"
-          defaultValue={state.url}
+          value={link}
+          defaultValue={state.link}
+          onChange={(e) => {
+            setLink(e.target.value);
+          }}
         />
       </WriteFormTemplate>
       <Button onClick={() => navigate("/write/intro")}>다음</Button>

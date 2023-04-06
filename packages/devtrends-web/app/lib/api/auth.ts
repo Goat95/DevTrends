@@ -1,5 +1,6 @@
 import axios from "axios";
 import { client } from "../client";
+import { type User } from "./types";
 
 export async function register(params: AuthParams) {
   const response = await axios.post<AuthResult>(
@@ -54,9 +55,4 @@ export interface AuthResult {
 export interface Tokens {
   accessToken: string;
   refreshToken: string;
-}
-
-export interface User {
-  id: number;
-  username: string;
 }

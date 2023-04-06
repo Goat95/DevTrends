@@ -12,9 +12,10 @@ import {
 import { PROTECTED_ROUTES } from "./constants";
 import { UserContext } from "./contexts/UserContext";
 import GlobalStyle from "./GlobalStyle";
-import { getMyAccount, type User } from "./lib/api/auth";
+import { getMyAccount } from "./lib/api/auth";
 import { setClientCookie } from "./lib/client";
 import { extractError } from "./lib/error";
+import { type User } from "./lib/api/types";
 
 function extractPathNameFromUrl(url: string) {
   const { pathname } = new URL(url);
