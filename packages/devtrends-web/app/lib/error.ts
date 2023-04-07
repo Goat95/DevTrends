@@ -1,3 +1,4 @@
+import { type ThrownResponse, useCatch } from "@remix-run/react";
 import axios from "axios";
 
 type ErrorName =
@@ -45,4 +46,9 @@ export function extractError(error: any): AppError {
     message: "Unknown error",
     name: "UnknownError",
   };
+}
+
+export function useAppErrorCatch() {
+  const caught = useCatch<ThrownResponse<number, AppError>>();
+  return caught;
 }
