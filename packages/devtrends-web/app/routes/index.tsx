@@ -7,6 +7,7 @@ import TabLayout from "~/components/layouts/TabLayout";
 import { getItems } from "~/lib/api/items";
 import { type GetItemsResult } from "~/lib/api/types";
 import { parseUrlParams } from "~/lib/parseUrlParams";
+import { useInfiniteScroll } from "~/hooks/useInfiniteScroll";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const { cursor } = parseUrlParams<{ cursor?: string }>(request.url);
@@ -40,27 +41,7 @@ export default function Index() {
     setPages(pages.concat(fetcher.data));
   }, [fetcher.data, pages]);
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            fetchNext();
-          }
-        });
-      },
-      {
-        root: ref.current.parentElement,
-        rootMargin: "64px",
-        threshold: 1,
-      }
-    );
-    observer.observe(ref.current);
-    return () => {
-      observer.disconnect();
-    };
-  }, [fetchNext]);
+  useInfiniteScroll(ref, fetchNext);
 
   const items = pages.flatMap((page) => page.list);
 
