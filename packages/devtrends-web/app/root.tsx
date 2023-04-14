@@ -1,5 +1,4 @@
 import type { LoaderFunction, MetaFunction } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -9,13 +8,13 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
-import { PROTECTED_ROUTES } from "./constants";
 import { UserContext } from "./contexts/UserContext";
 import GlobalStyle from "./GlobalStyle";
 import { getMyAccount } from "./lib/api/auth";
 import { setClientCookie } from "./lib/client";
 import { extractError } from "./lib/error";
 import { type User } from "./lib/api/types";
+import { ItemStatsProvider } from "./contexts/ItemStatsContext";
 
 function extractPathNameFromUrl(url: string) {
   const { pathname } = new URL(url);
@@ -71,7 +70,9 @@ export default function App() {
       <body>
         <GlobalStyle />
         <UserContext.Provider value={data}>
-          <Outlet />
+          <ItemStatsProvider>
+            <Outlet />
+          </ItemStatsProvider>
         </UserContext.Provider>
         <ScrollRestoration />
         <Scripts />

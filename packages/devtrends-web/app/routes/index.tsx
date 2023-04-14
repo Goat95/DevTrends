@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ActionFunction, json, type LoaderFunction } from "@remix-run/node";
+import {
+  type ActionFunction,
+  json,
+  type LoaderFunction,
+} from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import styled from "styled-components";
 import LinkCardList from "~/components/home/LinkCardList";
@@ -15,31 +19,6 @@ export const loader: LoaderFunction = async ({ request }) => {
   const list = await getItems(parsedCursor);
   return json(list);
 };
-
-export const action: ActionFunction = async ({ request }) => {
-  const params = parseUrlParams<LikeActionParams>(request.url);
-  if (params.type === "like" || params.type === "unlike") {
-    const handle = params.type === "like" ? likeItem : unlikeItem;
-    const result = await handle(params.itemId);
-    return json({
-      type: params.type,
-      itemId: params.itemId,
-      itemStats: result.itemStats,
-    });
-  }
-  return null;
-};
-
-interface LikeActionParams {
-  type: "like" | "unlike";
-  itemId: number;
-}
-
-export interface LikeActionResult {
-  type: "like" | "unlike";
-  itemId: number;
-  likes: number;
-}
 
 export default function Index() {
   const data = useLoaderData<GetItemsResult>();
