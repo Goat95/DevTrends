@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { json, type LoaderFunction } from "@remix-run/node";
+import { ActionFunction, json, type LoaderFunction } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import styled from "styled-components";
 import LinkCardList from "~/components/home/LinkCardList";
 import TabLayout from "~/components/layouts/TabLayout";
-import { getItems } from "~/lib/api/items";
+import { getItems, likeItem, unlikeItem } from "~/lib/api/items";
 import { type GetItemsResult } from "~/lib/api/types";
 import { parseUrlParams } from "~/lib/parseUrlParams";
 import { useInfiniteScroll } from "~/hooks/useInfiniteScroll";
@@ -15,6 +15,31 @@ export const loader: LoaderFunction = async ({ request }) => {
   const list = await getItems(parsedCursor);
   return json(list);
 };
+
+export const action: ActionFunction = async ({ request }) => {
+  const params = parseUrlParams<LikeActionParams>(request.url);
+  if (params.type === "like" || params.type === "unlike") {
+    const handle = params.type === "like" ? likeItem : unlikeItem;
+    const result = await handle(params.itemId);
+    return json({
+      type: params.type,
+      itemId: params.itemId,
+      itemStats: result.itemStats,
+    });
+  }
+  return null;
+};
+
+interface LikeActionParams {
+  type: "like" | "unlike";
+  itemId: number;
+}
+
+export interface LikeActionResult {
+  type: "like" | "unlike";
+  itemId: number;
+  likes: number;
+}
 
 export default function Index() {
   const data = useLoaderData<GetItemsResult>();
