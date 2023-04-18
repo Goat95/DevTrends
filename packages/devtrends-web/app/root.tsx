@@ -14,7 +14,7 @@ import { getMyAccount } from "./lib/api/auth";
 import { setClientCookie } from "./lib/client";
 import { extractError } from "./lib/error";
 import { type User } from "./lib/api/types";
-import { ItemStatsProvider } from "./contexts/ItemStatsContext";
+import { ItemOverrideProvider } from "./contexts/ItemStatsContext";
 
 function extractPathNameFromUrl(url: string) {
   const { pathname } = new URL(url);
@@ -70,9 +70,9 @@ export default function App() {
       <body>
         <GlobalStyle />
         <UserContext.Provider value={data}>
-          <ItemStatsProvider>
+          <ItemOverrideProvider>
             <Outlet />
-          </ItemStatsProvider>
+          </ItemOverrideProvider>
         </UserContext.Provider>
         <ScrollRestoration />
         <Scripts />
