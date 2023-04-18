@@ -14,7 +14,7 @@ import { getMyAccount } from "./lib/api/auth";
 import { setClientCookie } from "./lib/client";
 import { extractError } from "./lib/error";
 import { type User } from "./lib/api/types";
-import { ItemOverrideProvider } from "./contexts/ItemStatsContext";
+import { ItemOverrideProvider } from "./contexts/ItemOverrideContext";
 
 function extractPathNameFromUrl(url: string) {
   const { pathname } = new URL(url);
