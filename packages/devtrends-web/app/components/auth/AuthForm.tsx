@@ -1,4 +1,4 @@
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useSearchParams } from "@remix-run/react";
 import { useEffect } from "react";
 import styled from "styled-components";
 import { useForm } from "~/hooks/useForm";
@@ -39,6 +39,8 @@ const authDescriptions = {
 
 function AuthForm({ mode, error }: Props) {
   const action = useActionData<ActionData | undefined>();
+  const [searchParams] = useSearchParams();
+  const next = searchParams.get("next");
   const isLoading = useSubmitLoading();
 
   const { inputProps, handleSubmit, errors, setError } = useForm({
@@ -99,7 +101,11 @@ function AuthForm({ mode, error }: Props) {
         <Button type="submit" layoutMode="fullWidth" disabled={isLoading}>
           {buttonText}
         </Button>
-        <QuestionLink question={question} name={actionText} to={actionLink} />
+        <QuestionLink
+          question={question}
+          name={actionText}
+          to={next ? `${actionLink}?next=${next}` : actionLink}
+        />
       </ActionsBox>
     </StyledForm>
   );
