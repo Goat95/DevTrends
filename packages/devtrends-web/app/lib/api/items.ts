@@ -21,16 +21,23 @@ export async function getItems(cursor?: number) {
   return response.data;
 }
 
-export async function likeItem(itemId: number) {
+export async function likeItem(itemId: number, controller?: AbortController) {
   const response = await client.post<LikeItemResult>(
-    `/api/items/${itemId}/likes`
+    `/api/items/${itemId}/likes`,
+    {},
+    {
+      signal: controller?.signal,
+    }
   );
   return response.data;
 }
 
-export async function unlikeItem(itemId: number) {
+export async function unlikeItem(itemId: number, controller?: AbortController) {
   const response = await client.delete<LikeItemResult>(
-    `/api/items/${itemId}/likes`
+    `/api/items/${itemId}/likes`,
+    {
+      signal: controller?.signal,
+    }
   );
   return response.data;
 }
