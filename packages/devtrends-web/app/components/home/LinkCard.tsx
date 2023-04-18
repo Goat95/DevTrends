@@ -6,6 +6,7 @@ import { useDateDistance } from "~/hooks/useDateDistance";
 import { useLikeManager } from "~/hooks/useLikeManager";
 import LikeButton from "../system/LikeButton";
 import { useItemOverrideById } from "~/contexts/ItemOverrideContext";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface Props {
   item: Item;
@@ -44,9 +45,18 @@ function LinkCard({ item }: Props) {
       </Publisher>
       <h3>{title}</h3>
       <p>{body}</p>
-      {likes === 0 ? null : (
-        <LikesCount>좋아요 {likes.toLocaleString()}개</LikesCount>
-      )}
+      <AnimatePresence initial={false}>
+        {likes === 0 ? null : (
+          <LikesCount
+            key="likes"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 26, opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+          >
+            좋아요 {likes.toLocaleString()}개
+          </LikesCount>
+        )}
+      </AnimatePresence>
       <Footer>
         <LikeButton isLiked={isLiked} onClick={toggleLike} />
         <UserInfo>
@@ -107,12 +117,13 @@ const Publisher = styled.div`
   }
 `;
 
-const LikesCount = styled.div`
+const LikesCount = styled(motion.div)`
   font-size: 12px;
   font-weight: 600;
   color: ${colors.gray4};
   line-height: 1.5;
-  margin-bottom: 8px;
+  height: 26px;
+  display: flex;
 `;
 
 const Footer = styled.div`
