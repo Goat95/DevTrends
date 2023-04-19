@@ -7,6 +7,9 @@ import { useLikeManager } from "~/hooks/useLikeManager";
 import LikeButton from "../system/LikeButton";
 import { useItemOverrideById } from "~/contexts/ItemOverrideContext";
 import { AnimatePresence, motion } from "framer-motion";
+import { useUser } from "~/contexts/UserContext";
+import { useDialog } from "~/contexts/DialogContext";
+import { useNavigate } from "@remix-run/react";
 
 interface Props {
   item: Item;
@@ -18,12 +21,24 @@ function LinkCard({ item }: Props) {
   const itemOverride = useItemOverrideById(id);
   const dateDistance = useDateDistance(createdAt);
   const { like, unlike } = useLikeManager();
+  const currentUser = useUser();
 
   const itemStats = itemOverride?.itemStats ?? item.itemStats;
   const isLiked = itemOverride?.isLiked ?? item.isLiked;
   const likes = itemOverride?.itemStats.likes ?? itemStats.likes;
+  const navigate = useNavigate();
+  const { open } = useDialog();
 
   const toggleLike = () => {
+    if (!currentUser) {
+      open({
+        title: "hello",
+        description: "hihi",
+        onConfirm() {
+          navigate("/auth/login");
+        },
+      });
+    }
     if (isLiked) {
       unlike(id, itemStats);
     } else {

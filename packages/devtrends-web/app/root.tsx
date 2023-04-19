@@ -15,6 +15,7 @@ import { setClientCookie } from "./lib/client";
 import { extractError } from "./lib/error";
 import { type User } from "./lib/api/types";
 import { ItemOverrideProvider } from "./contexts/ItemOverrideContext";
+import DialogProvider from "./contexts/DialogContext";
 
 function extractPathNameFromUrl(url: string) {
   const { pathname } = new URL(url);
@@ -69,11 +70,13 @@ export default function App() {
       </head>
       <body>
         <GlobalStyle />
-        <UserContext.Provider value={data}>
-          <ItemOverrideProvider>
-            <Outlet />
-          </ItemOverrideProvider>
-        </UserContext.Provider>
+        <DialogProvider>
+          <UserContext.Provider value={data}>
+            <ItemOverrideProvider>
+              <Outlet />
+            </ItemOverrideProvider>
+          </UserContext.Provider>
+        </DialogProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
