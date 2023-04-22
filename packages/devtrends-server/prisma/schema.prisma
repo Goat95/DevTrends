@@ -106,6 +106,7 @@ model ItemLike {
 
   item         Item     @relation(fields: [itemId], references: [id])
 
+  @@index(itemId)
   @@unique([itemId, userId])
 }
 
@@ -135,9 +136,10 @@ model Comment {
   deletedAt    DateTime?
 
   likesCount   Int      @default(0)
+  subcommentsCount Int  @default(0)
   
   mentionUserId Int?
-  parentCommentId Int
+  parentCommentId Int?
   itemId        Int
   userId        Int
 
@@ -154,5 +156,6 @@ model CommentLike {
 
   item         Comment  @relation(fields: [commentId], references: [id])
 
+  @@index(commentId)
   @@unique([commentId, userId])
 }
