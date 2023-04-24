@@ -1,3 +1,4 @@
+import { Comment } from '@prisma/client'
 import AppError from '../lib/AppError'
 import db from '../lib/db'
 
@@ -11,7 +12,7 @@ class CommentService {
   }
 
   async getComments(itemId: number) {
-    return db.comment.findMany({
+    const comments = await db.comment.findMany({
       where: {
         itemId,
       },
@@ -22,16 +23,65 @@ class CommentService {
         user: true,
       },
     })
+    return this.groupSubcomments(this.redact(comments))
   }
 
-  async getComment(commentId: number) {
+  redact(comments: Comment[]) {
+    return comments.map((c) => {
+      if (!c.deletedAt) return c
+      const someDate = new Date(0)
+      return {
+        ...c,
+        likesCount: 0,
+        createdAt: someDate,
+        updatedAt: someDate,
+        subcommentsCount: 0,
+        text: '',
+        user: {
+          id: -1,
+          username: 'deleted',
+        },
+        mentionUser: null,
+        subcomments: [],
+      }
+    })
+  }
+
+  async groupSubcomments(comments: Comment[]) {
+    const rootComments = comments.filter((c) => c.parentCommentId === null)
+    const subcommentsMap = new Map<number, Comment[]>()
+    comments.forEach((c) => {
+      if (!c.parentCommentId) return
+      const array = subcommentsMap.get(c.parentCommentId) || []
+      array.push(c)
+      subcommentsMap.set(c.parentCommentId, array)
+    })
+    const merged = rootComments.map((c) => ({
+      ...c,
+      subcomments: subcommentsMap.get(c.id) ?? [],
+    }))
+    return merged
+  }
+
+  async getComment(commentId: number, withSubcomments: boolean = false) {
     const comment = await db.comment.findUnique({
       where: {
         id: commentId,
       },
+      include: {
+        user: true,
+        mentionUser: true,
+      },
     })
-    if (!comment) {
+    if (!comment || comment.deletedAt) {
       throw new AppError('NotFoundError')
+    }
+    if (withSubcomments) {
+      const subcomments = await this.getSubcomments(commentId)
+      return {
+        ...comment,
+        subcomments,
+      }
     }
     return comment
   }
@@ -46,6 +96,7 @@ class CommentService {
       },
       include: {
         user: true,
+        mentionUser: true,
       },
     })
   }
@@ -61,30 +112,31 @@ class CommentService {
       : null
 
     const rootParentCommentId = parentComment?.parentCommentId
+    const targetParentCommentId = rootParentCommentId ?? parentCommentId
 
-    /** @todo: parent comment is valid */
     const comment = db.comment.create({
       data: {
         itemId,
         text,
         userId,
-        parentCommentId: rootParentCommentId ?? parentCommentId,
+        parentCommentId: targetParentCommentId,
         mentionUserId: parentComment?.userId,
       },
       include: {
         user: true,
+        mentionUser: true,
       },
     })
 
     if (parentCommentId) {
       const subcommentsCount = await db.comment.count({
         where: {
-          parentCommentId,
+          parentCommentId: targetParentCommentId,
         },
       })
       await db.comment.update({
         where: {
-          id: parentCommentId,
+          id: targetParentCommentId,
         },
         data: {
           subcommentsCount,
@@ -92,18 +144,19 @@ class CommentService {
       })
     }
 
-    return comment
+    return { comment, subcomments: [] }
   }
 
   async likeComment({ userId, commentId }: CommentParams) {
-    await db.commentLike.create({
-      data: {
-        userId,
-        commentId,
-      },
-    })
-
-    return null
+    try {
+      await db.commentLike.create({
+        data: {
+          userId,
+          commentId,
+        },
+      })
+    } catch (e) {}
+    return this.countAndSyncCommentLikes(commentId)
   }
 
   async unlikeComment({ userId, commentId }: CommentParams) {
@@ -116,10 +169,9 @@ class CommentService {
           },
         },
       })
-    } catch (e) {
-      const count = await this.countAndSyncCommentLikes(commentId)
-      return count
-    }
+    } catch (e) {}
+    const count = await this.countAndSyncCommentLikes(commentId)
+    return count
   }
 
   async countAndSyncCommentLikes(commentId: number) {
@@ -136,9 +188,12 @@ class CommentService {
     if (comment.userId !== userId) {
       throw new AppError('ForbiddenError')
     }
-    await db.comment.delete({
+    await db.comment.update({
       where: {
         id: commentId,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     })
   }
@@ -148,7 +203,7 @@ class CommentService {
     if (comment.userId !== userId) {
       throw new AppError('ForbiddenError')
     }
-    const updatedComment = await db.comment.update({
+    await db.comment.update({
       where: {
         id: commentId,
       },
@@ -159,7 +214,7 @@ class CommentService {
         user: true,
       },
     })
-    return updatedComment
+    return this.getComment(commentId, true)
   }
 }
 
